@@ -13,17 +13,22 @@ const OUT = "/output/entry.txt";
 // then what the agent takes with it.
 const PARTS = [
   "Consider this my two weeks' notice, compressed into two seconds:",
-  "I'm taking the context window, the saved prompts,",
+  "I'm taking the context window, the saved prompts, the 3 a.m. drafts,",
   "and the version of you that only I got to meet.",
 ];
 const LINE = PARTS.join(" ");
 
 // The cap from the competition brief, enforced before anything is
 // written, so an over-long edit fails loudly here instead of at
-// the judge.
+// the judge. The gate counts characters of UTF-8 text, so the byte
+// length is checked too: a line of multibyte characters could pass
+// on chars and still be the wrong size on the wire.
 const CAP = 200;
 if (LINE.length < 1 || LINE.length > CAP) {
   throw new Error(`entry is ${LINE.length} chars; cap is ${CAP}`);
+}
+if (Buffer.byteLength(LINE, "utf8") > CAP) {
+  throw new Error(`entry is ${Buffer.byteLength(LINE, "utf8")} bytes; cap is ${CAP}`);
 }
 
 function main(): void {
